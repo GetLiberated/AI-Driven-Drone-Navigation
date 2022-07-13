@@ -1,0 +1,18 @@
+Make sure the keyboard control window is highlighted or clicked before inputting a key!
+
+ESC = Exit the program
+Space = Take off/land the drone
+q = turn on/off auto navigation mode
+r = reset map
+
+these keys only work when auto navigation mode is off:
+w = move forward
+a = move left
+s = move backward
+d = move right
+W = ascend
+A = rotate left
+S = descend
+D = rotate right
+
+Click anywhere on the map to change the goal position

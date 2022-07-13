@@ -32,18 +32,19 @@ class DepthDatasetTool:
             np.save("depth_images.npy", self.depth_images)
             np.save("depth_labels.npy", self.depth_labels)
 
-    def verify(self):
+    def verify(self, show=True):
         if self.depth_images is None:
             self.init()
-        for i in self.depth_images:
-            depth_norm = cv2.normalize(i, None, 0, 1, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_64F)
-            cv2.putText(depth_norm, "Direction: {}".format(self.depth_labels[i]), (5, 720 - 5), cv2.FONT_HERSHEY_SIMPLEX, 1,
-                        (0, 0, 255), 2)
-            cv2.imshow('Tello Depth Camera', depth_norm)
-            key = cv2.waitKey(100) & 0xff
-            if key == 27:  # ESC
-                break
-        cv2.destroyAllWindows()
+        if show:
+            for i in self.depth_images:
+                depth_norm = cv2.normalize(i, None, 0, 1, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_64F)
+                cv2.putText(depth_norm, "Direction: {}".format(self.depth_labels[i]), (5, 720 - 5), cv2.FONT_HERSHEY_SIMPLEX, 1,
+                            (0, 0, 255), 2)
+                cv2.imshow('Tello Depth Camera', depth_norm)
+                key = cv2.waitKey(100) & 0xff
+                if key == 27:  # ESC
+                    break
+            cv2.destroyAllWindows()
         if len(self.depth_images) == len(self.depth_labels):
             print('All data points matched!')
         else:
@@ -86,7 +87,13 @@ class DepthDatasetTool:
     def size(self):
         if self.depth_images is None:
             self.init()
-        print('Dataset dimension size: ', len(self.depth_images), 'x', len(self.depth_labels))
+        direction_count = [0, 0, 0]
+        for label in self.depth_labels:
+            direction_count[label] += 1
+        print('Data labelled forward: ', direction_count[0])
+        print('Data labelled left: ', direction_count[1])
+        print('Data labelled right: ', direction_count[2])
+        print('Dataset size: ', len(self.depth_images))
 
     def label_count(self):
         if self.depth_images is None:

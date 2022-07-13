@@ -17,26 +17,29 @@ class Map(arcade.Window):
     Main application class.
     """
 
-    def __init__(self, dest_pos=(600, 700)):
+    def __init__(self, goal_pos=(600, 700)):
 
         # Call the parent class and set up the window
         super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE)
 
-        # Separate variable that holds the drone sprite
+        # Separate variables that hold the drone and destination point sprite
         self.drone_sprite = None
         self.destination_point = None
 
-        self.dest_pos = dest_pos
+        # Variable to hold destination point's position
+        self.dest_pos = goal_pos
         self.reach_goal = False
 
-        # Create a variable to hold our speed.
+        # Create a variable to hold our speed
         self.speed = 0
 
+        # Hold current real-life drone's position and rotation direction
         self.pos_direction = None
         self.rot_direction = None
         self.red_light = True
         self.target_angle_is_close = False
 
+        # Store line trails position
         self.point_list = ()
 
         arcade.set_background_color(arcade.csscolor.WHITE)
@@ -97,9 +100,9 @@ class Map(arcade.Window):
             dest_x = self.destination_point.center_x
             dest_y = self.destination_point.center_y
 
-            # Do math to calculate how to get the sprite to the destination.
+            # Do math to calculate how to get the drone to the destination.
             # Calculation the angle in radians between the start points
-            # and end points. This is the angle the player will travel.
+            # and end points. This is the angle the drone will travel.
             x_diff = dest_x - start_x
             y_diff = dest_y - start_y
             target_angle_radians = math.atan2(y_diff, x_diff)
@@ -107,7 +110,7 @@ class Map(arcade.Window):
                 target_angle_radians += 2 * math.pi
 
             # What angle are we at now in radians?
-            rot = open('E:\\GitHub\\Dissertation\\.temp\\rot').read()
+            rot = open('.temp/rot').read()
             if rot != '':
                 self.drone_sprite.angle = int(rot)
             actual_angle_radians = math.radians(self.drone_sprite.angle + 90)
@@ -175,8 +178,6 @@ class Map(arcade.Window):
 
             # When we reach to destination point's 10cm x 10cm square area.
             arrived = False
-            # print('x: ', abs(self.drone_sprite.center_x - dest_x))
-            # print('y: ', abs(self.drone_sprite.center_y - dest_y))
             if abs(self.drone_sprite.center_x - dest_x) < 10 and abs(self.drone_sprite.center_y - dest_y) < 10:
                 self.drone_sprite.center_x = dest_x
                 self.drone_sprite.center_y = dest_y
@@ -184,7 +185,7 @@ class Map(arcade.Window):
 
             # If we have arrived, then cancel our destination point
             if arrived:
-                # self.destination_point.remove_from_sprite_lists() # Destroy current goal and move on to next goal
+                # self.destination_point.remove_from_sprite_lists() # Idea: destroy current goal and go to next goal
                 self.reach_goal = True
 
     def on_mouse_press(self, x, y, button, key_modifiers):

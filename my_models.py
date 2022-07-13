@@ -5,7 +5,7 @@ Collection of models that are used for this project.
 """
 import cv2
 import copy
-
+import matplotlib.pyplot as plt
 import numpy as np
 import torch
 import torch.nn as nn
@@ -61,7 +61,7 @@ class MiDaS:
         return output
 
 
-class AlexNet:
+class DepthDirectionDecision:
     def __init__(self, device=torch.device("cuda:0")):
         self.model = None
         self.device = device
@@ -138,20 +138,20 @@ class AlexNet:
                 loss = cec(pred, labels)
                 loss.backward()
                 optimizer.step()
-            accuracy = float(self.validate(cnn, images_test, labels_test))
+            accuracy = float(self.validate(cnn, images_test, labels_test, batch_size))
             accuracies.append(accuracy)
             print('Epoch:', epoch + 1, "Accuracy :", accuracy, '%')
             if accuracy > max_accuracy:
                 self.model = copy.deepcopy(cnn)
                 max_accuracy = accuracy
                 print("New Best Model with Accuracy: ", accuracy)
-        # print(accuracies)
+        plt.plot(accuracies)
         print("Saving best model...")
-        torch.save(self.model.state_dict(), "alexnet.pth")
+        torch.save(self.model.state_dict(), "depth_direction_decision.pth")
 
     def load(self):
         self.model = self.alexnet().to(self.device)
-        self.model.load_state_dict(torch.load("alexnet.pth"))
+        self.model.load_state_dict(torch.load("depth_direction_decision.pth"))
 
     def predict(self, x):
         x = cv2.resize(x, dsize=(224, 224))
@@ -162,11 +162,11 @@ class AlexNet:
         ])
         with torch.no_grad():
             pred = self.model(torch.unsqueeze(T(x), axis=0).float().to(self.device))
-            pred = F.softmax(pred, dim=-1).cpu().numpy()
+            # pred = F.softmax(pred, dim=-1).cpu().numpy()
             # pred_idx = np.argmax(pred)
             # print(f"Predicted: {pred_idx}, Prob: {pred[0][pred_idx] * 100} %")
             # return pred_idx
-            return pred
+            return pred.cpu().numpy()
 
     def load_dataset(self):
         depth_images = np.load("depth_images.npy")
@@ -178,7 +178,8 @@ class AlexNet:
         depth_images = cv2.normalize(resized_depth_images, None, 0, 1, norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_32F) # Normalisation
         # depth_images = resized_depth_images # Raw
 
-        self.images_train = depth_images[:2000]
-        self.labels_train = depth_labels[:2000]
-        self.images_test = depth_images[2000:]
-        self.labels_test = depth_labels[2000:]
+        divider = int(len(depth_labels) * 0.8)
+        self.images_train = depth_images[:divider]
+        self.labels_train = depth_labels[:divider]
+        self.images_test = depth_images[divider:]
+        self.labels_test = depth_labels[divider:]

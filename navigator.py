@@ -1,7 +1,7 @@
 """
 Navigator Class
 
-Provides the safest positional direction to aid drone's navigation.
+Provides the safest direction to aid drone's navigation.
 """
 from numpy import argmax, exp
 
@@ -9,18 +9,17 @@ from numpy import argmax, exp
 CAM_WIDTH = 960
 CAM_HEIGHT = 720
 
-# calculate the softmax of a vector
-def softmax(vector):
-    e = exp(vector)
-    return e / e.sum()
-
 
 class Navigator:
     def __init__(self):
-        # self.direction = [0, 0, 0, 0]  # Forward, Left, Right, Stop
         self.direction = [0, 0, 0, 0, 0]  # Forward, Left, Right, Up, Down
         self.near_obj = None
         self.near_obj_name = None
+
+    # calculate the softmax of a vector
+    def softmax(self, vector):
+        e = exp(vector)
+        return e / e.sum()
 
     def get_direction(self, objects, depth):
         self.direction = [1, 0, 0, 0, 0]
@@ -66,4 +65,4 @@ class Navigator:
         if depth_prob == self.direction[direction_idx]:
             self.near_obj_name = 'Wall'
 
-        return direction_idx, self.near_obj_name, str(softmax(self.direction))
+        return direction_idx, self.near_obj_name, str(self.softmax(self.direction))
